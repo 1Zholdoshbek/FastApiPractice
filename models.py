@@ -1,33 +1,44 @@
 from typing import Optional
 from pydantic import BaseModel
-# Модель пользователя с дополнительными полями
+from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy.ext.declarative import declarative_base
+
+# Базовый класс для SQLAlchemy моделей
+Base = declarative_base()
+
+# Pydantic модели
 class User(BaseModel):
     username: str
     email: Optional[str] = None
     full_name: Optional[str] = None
     disabled: Optional[bool] = None
 
-# Модель для хранения пароля (для базы данных)
 class UserInDB(User):
     hashed_password: str
 
-# Модель запроса для создания пользователя
 class UserCreate(BaseModel):
     username: str
     email: str
     password: str
     full_name: Optional[str] = None
 
-# Модель токена
 class Token(BaseModel):
     access_token: str
     token_type: str
     refresh_token: str
 
-# Модель данных в токене
 class TokenData(BaseModel):
     username: Optional[str] = None
 
-# Модель для обновления refresh-токена
 class RefreshTokenRequest(BaseModel):
     refresh_token: str
+
+# SQLAlchemy модель для таблицы users
+class UserDB(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True)
+    email = Column(String, unique=True, index=True)
+    full_name = Column(String, nullable=True)
+    disabled = Column(Boolean, default=False)
+    hashed_password = Column(String)
